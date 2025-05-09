@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Save, Mail, FileText, ChevronDown, ChevronUp, CheckSquare } from 'lucide-react';
+import { Save, ChevronDown, ChevronUp, CheckSquare } from 'lucide-react';
 
 // Polyfill for html2canvas to handle oklch() colors
 if (typeof window !== 'undefined' && window.CSS && window.CSS.supports) {
@@ -272,49 +272,6 @@ const RideAlongChecklist = () => {
       ...prev,
       [sectionKey]: !prev[sectionKey],
     }));
-  };
-
-  const saveTextReport = () => {
-    const textContent = generateTextReport();
-    const blob = new Blob([textContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `RideAlong_${evalData.clinicianName || 'Evaluation'}_${evalData.date}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
-  const generateTextReport = () => {
-    let report = `HOME VISIT RIDE-ALONG EVALUATION\n`;
-    report += `=================================\n\n`;
-    report += `Date: ${evalData.date}\n`;
-    report += `Evaluator: ${evalData.evaluatorName}\n`;
-    report += `Clinician Being Evaluated: ${evalData.clinicianName}\n\n`;
-    report += `Tasks Completed: ${stats.completedTasks} out of ${stats.totalTasks} (${stats.completionRate}%)\n\n`;
-    checklistStructure.forEach(section => {
-      report += `\n${section.title.toUpperCase()}\n`;
-      report += `${'='.repeat(section.title.length)}\n\n`;
-      section.items.forEach(item => {
-        report += `[${checkboxes[section.key][item] ? 'X' : ' '}] ${item}\n`;
-      });
-      report += `\nNotes on ${section.title}:\n`;
-      report += `${evalData.notes[section.key] || 'No notes provided.'}\n`;
-    });
-    report += `\nOVERALL ASSESSMENT\n`;
-    report += `=================\n\n`;
-    report += `${evalData.notes.overallAssessment || 'No overall assessment provided.'}\n`;
-    return report;
-  };
-
-  const emailForm = () => {
-    const textContent = generateTextReport();
-    const subject = encodeURIComponent(`Ride-Along Evaluation - ${evalData.clinicianName} - ${evalData.date}`);
-    const body = encodeURIComponent(textContent);
-    const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
-    window.location.href = mailtoLink;
   };
 
   return (
