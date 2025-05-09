@@ -5,12 +5,15 @@ import { Save, ChevronDown, ChevronUp, CheckSquare } from 'lucide-react';
 
 // Polyfill for html2canvas to handle oklch() colors
 if (typeof window !== 'undefined' && window.CSS && window.CSS.supports) {
-  const origSupports = window.CSS.supports;
-  window.CSS.supports = function (...args) {
-    if (args[0] && typeof args[0] === 'string' && args[0].includes('oklch')) {
+  const origSupports = window.CSS.supports.bind(window.CSS);
+  window.CSS.supports = function (property: string, value?: string): boolean {
+    if (typeof property === 'string' && property.includes('oklch')) {
       return false;
     }
-    return origSupports.apply(this, args);
+    if (typeof value === 'string') {
+      return origSupports(property, value);
+    }
+    return origSupports(property);
   };
 }
 
@@ -339,7 +342,7 @@ const RideAlongChecklist = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Notes on {section.title.toLowerCase()}...</label>
                 <textarea
-                  ref={el => (textareaRefs.current[section.key] = el)}
+                  ref={el => { textareaRefs.current[section.key] = el; }}
                   value={evalData.notes[section.key]}
                   onChange={e => {
                     handleNotesChange(section.key, e.target.value);
@@ -359,7 +362,7 @@ const RideAlongChecklist = () => {
       <div className="mb-6">
         <label className="block text-lg font-semibold mb-2">Overall Assessment</label>
         <textarea
-          ref={el => (textareaRefs.current['overallAssessment'] = el)}
+          ref={el => { textareaRefs.current['overallAssessment'] = el; }}
           value={evalData.notes.overallAssessment}
           onChange={e => {
             handleNotesChange('overallAssessment', e.target.value);
